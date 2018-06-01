@@ -17,6 +17,7 @@
 #include "../models/DefaultParams.h"
 #include "CelestialBodyController.h"
 #include "ParamsController.h"
+#include "../models/CameraCoordinate.h"
 
 using namespace std;
 
@@ -28,16 +29,28 @@ public:
 	static void drawScene();
 	static void update(int idx);
 	static void keyboardCallback(unsigned char key, int x, int y);
+	static void specialKeyboardCallback(int key, int x, int y);
 
 	static int SCREEN_PARAMS_ID;
 	static int SCREEN_PLANETS_ID;
 
+	static int TOP_CAMERA_ID;
+	static int DIAGONAL_CAMERA_ID;
+	static int SATELLITE_CAMERA_ID;
+
+	static float topCamera[];
+	static float diagonalCamera[];
+	static float satelliteCamera[];
+
 private:
 
+	static void setCamera(int newCameraId);
 	static CelestialBodyController *celestialBodyController;
 	static ParamsController *paramsController;
 
 	static int screenId;
+	static int cameraId;
+	static int newCameraId;
 
 };
 

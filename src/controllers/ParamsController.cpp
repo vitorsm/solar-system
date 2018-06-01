@@ -18,10 +18,10 @@ ParamsController::~ParamsController() {
 
 Params *ParamsController::getParams() {
 	this->params = new Params();
-	this->params->setPlanetsAmount(DefaultParams::DEFAULT_PLANETS_AMOUNT);
-//	this->params->setPlanetsAmount(1);
-	this->params->setArtificialSatelliteAmount(2);
-	this->params->setNaturalSatelliteAmount(2);
+//	this->params->setPlanetsAmount(DefaultParams::DEFAULT_PLANETS_AMOUNT);
+	this->params->setPlanetsAmount(1);
+	this->params->setArtificialSatelliteAmount(1);
+	this->params->setNaturalSatelliteAmount(1);
 
 	return this->params;
 }
