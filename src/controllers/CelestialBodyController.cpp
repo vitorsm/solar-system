@@ -20,39 +20,86 @@ CelestialBodyController::~CelestialBodyController() {
 }
 
 void CelestialBodyController::initTextures() {
-	if (texture == NULL) {
-		texture = SOIL_load_OGL_texture(
-				"src/resources/mars-small.jpg",
-//				"src/resources/vitor.jpg",
+	if (planetTextures[0] == NULL) {
+		for (int i = 0; i < 11; i++) {
+			if (i == 0) {
+				planetTextures[i] = SOIL_load_OGL_texture(
+					"src/resources/sun2.jpg",
+					SOIL_LOAD_AUTO,
+					SOIL_CREATE_NEW_ID,
+					SOIL_FLAG_INVERT_Y | SOIL_FLAG_NTSC_SAFE_RGB | SOIL_FLAG_COMPRESS_TO_DXT
+				);
+			} else {
+				cout << Utils::concatChar(Utils::concatValue("src/resources/planet_", i), ".jpg") << endl;
+				planetTextures[i] = SOIL_load_OGL_texture(
+					Utils::concatChar(Utils::concatValue("src/resources/planet_", i), ".jpg"),
+					SOIL_LOAD_AUTO,
+					SOIL_CREATE_NEW_ID,
+					SOIL_FLAG_INVERT_Y | SOIL_FLAG_NTSC_SAFE_RGB | SOIL_FLAG_COMPRESS_TO_DXT
+				);
+			}
+		}
+
+		for (int i = 0; i < 3; i++) {
+			cout << Utils::concatChar(Utils::concatValue("src/resources/satellite_", (i + 1)), ".jpg") << endl;
+			satelliteTextures[i] = SOIL_load_OGL_texture(
+					Utils::concatChar(Utils::concatValue("src/resources/satellite_", (i + 1)), ".jpg"),
 				SOIL_LOAD_AUTO,
 				SOIL_CREATE_NEW_ID,
 				SOIL_FLAG_INVERT_Y | SOIL_FLAG_NTSC_SAFE_RGB | SOIL_FLAG_COMPRESS_TO_DXT
-		);
+			);
+		}
 	}
-	if (texture == NULL)
+	if (planetTextures[0] == NULL)
 		cout << "Algo de errado não está certo com a textura: " << endl << SOIL_last_result() << endl;
 }
 
 void CelestialBodyController::configureLights() {
 
-	float difuseLight = 1.0;
-	float specLight = 1.0;
-	float globalAmbientLight = 0.2;
+//	float difuseLight = 1.0;
+//	float specLight = 1.0;
+//	float globalAmbientLight = 0;
+//
+//	float globAmb[] = { globalAmbientLight, globalAmbientLight, globalAmbientLight, 1.0 };
+//	float lightAmb[] = { 0.0, 0.0, 0.0, 1.0 };
+//	float lightDif0[] = { difuseLight, difuseLight, difuseLight, 1.0 };
+//	float lightSpec0[] = { specLight, specLight, specLight, 1.0 };
+//	float lightDifAndSpec1[] = { 0.0, 1.0, 0.0, 1.0 };
+//
+//	// Propriedades da fonte de luz LIGHT0
+//	glLightfv(GL_LIGHT0, GL_AMBIENT, lightAmb);
+//	glLightfv(GL_LIGHT0, GL_DIFFUSE, lightDif0);
+//	glLightfv(GL_LIGHT0, GL_SPECULAR, lightSpec0);
+////	glLightfv(GL_LIGHT0, GL_DIFFUSE, lightDifAndSpec1);
+////	glLightfv(GL_LIGHT0, GL_SPECULAR, lightDifAndSpec1);
+//
+//	glLightModelfv(GL_LIGHT_MODEL_AMBIENT, globAmb);// Luz ambiente global
+//	glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER, false);// Enable local viewpoint
+//
+//	glEnable(GL_LIGHT0);
 
-	float globAmb[] = { globalAmbientLight, globalAmbientLight, globalAmbientLight, 1.0 };
-	float lightAmb[] = { 0.0, 0.0, 0.0, 1.0 };
-	float lightDif0[] = { difuseLight, difuseLight, difuseLight, 1.0 };
-	float lightSpec0[] = { specLight, specLight, specLight, 1.0 };
+	GLfloat luzAmbiente[4]={0.2,0.2,0.2,1.0};
+	GLfloat luzDifusa[4]={0.7,0.7,0.7,1.0};          // "cor"
+	GLfloat luzEspecular[4]={1.0, 1.0, 1.0, 1.0};// "brilho"
+	GLfloat posicaoLuz[4]={0.0, 50.0, 50.0, 1.0};
 
-	// Propriedades da fonte de luz LIGHT0
-	glLightfv(GL_LIGHT0, GL_AMBIENT, lightAmb);
-	glLightfv(GL_LIGHT0, GL_DIFFUSE, lightDif0);
-	glLightfv(GL_LIGHT0, GL_SPECULAR, lightSpec0);
+	// Capacidade de brilho do material
+	GLfloat especularidade[4]={1.0,1.0,1.0,1.0};
+	GLint especMaterial = 60;
 
-	glLightModelfv(GL_LIGHT_MODEL_AMBIENT, globAmb);        // Luz ambiente global
-	glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER, false);// Enable local viewpoint
+	// Define a refletância do material
+	glMaterialfv(GL_FRONT,GL_SPECULAR, especularidade);
+	// Define a concentração do brilho
+	glMateriali(GL_FRONT,GL_SHININESS,especMaterial);
 
-	glEnable(GL_LIGHT0);
+	// Ativa o uso da luz ambiente
+	glLightModelfv(GL_LIGHT_MODEL_AMBIENT, luzAmbiente);
+
+	// Define os parâmetros da luz de número 0
+	glLightfv(GL_LIGHT0, GL_AMBIENT, luzAmbiente);
+	glLightfv(GL_LIGHT0, GL_DIFFUSE, luzDifusa );
+	glLightfv(GL_LIGHT0, GL_SPECULAR, luzEspecular );
+	glLightfv(GL_LIGHT0, GL_POSITION, posicaoLuz );
 
 }
 
@@ -65,66 +112,76 @@ void CelestialBodyController::drawSphere(float radius, int stacks, int columns) 
 	gluDeleteQuadric(quadObj);
 }
 
-void CelestialBodyController::drawCelestialBodies(float angle) {
+void CelestialBodyController::drawCelestialBodies(float angle, bool showRoute, bool onLight) {
 
-
-	// Posiciona a câmera de acordo com posição x,y do mouse na janela
+	this->onLight = onLight;
 
 	this->initTextures();
-	this->configureLights();
+	if (onLight) {
+		this->configureLights();
+		glEnable(GL_LIGHT0);
+	}
 
 	float depth = 0;
 
 	CelestialBody *celestialBody = celestialBodies->at(0);
 
-	glDisable(GL_LIGHTING);
+	if (onLight)
+		glDisable(GL_LIGHTING);
 
-	float lightPos0[] = {0, 0, 0};
+	glEnable(GL_TEXTURE_2D);
 
+	float lightPos0[] = { 0, 0, 0 };
+
+	glBindTexture(GL_TEXTURE_2D, planetTextures[0]);
 	glPushMatrix();
 		glTranslated(0,0, depth);
-//		glLightfv(GL_LIGHT0, GL_POSITION, lightPos0);
+		glLightfv(GL_LIGHT0, GL_POSITION, lightPos0);
 		glColor3f(1, 1, 1);
-//		glutWireSphere(celestialBody->getScale(),5,5);
-		glutWireTeapot(celestialBody->getScale());
+		drawSphere(celestialBody->getScale(), 50, 50);
 	glPopMatrix();
 
-//	glEnable(GL_TEXTURE_2D);
-//	glBindTexture(GL_TEXTURE_2D, texture);
-//	glEnable(GL_LIGHTING);
+	if (onLight)
+		glEnable(GL_LIGHTING);
 
-	glColor3f(1, 0, 0);
 
 	float s = 50.0;
 	float matShine[] = { s };
 
+	// Propriedades do material da esfera
+	float matAmbAndDif[] = {1.0, 1.0, 1.0, 1.0};    // cor ambiente e difusa: branca
+	float matSpec[] = { 1.0, 1.0, 1,0, 1.0 };       // cor especular: branca
+
+	// Definindo as propriedades do material
+	glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, matAmbAndDif);
+	glMaterialfv(GL_FRONT, GL_SPECULAR, matSpec);
 	glMaterialfv(GL_FRONT, GL_SHININESS, matShine);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	glColor3f(1, 0, 0);
 
 	for (int i = 1; i < celestialBodies->size(); i++) {
 		celestialBody = celestialBodies->at(i);
 
 		glPushMatrix();
-//			glRotatef(angle * celestialBody->getCoefRotation(), 0, 0, 1);
-//			glTranslated(celestialBody->getCoordindate()->getX(),0,depth);
-//			glRotatef(-angle * celestialBody->getCoefRotation(), 0, 0, 1);
-//			glRotatef(angle * celestialBody->getCoefTranslation(), 0, 0, 1);
-//			glutSolidSphere(celestialBody->getScale(),50,50);
-
-
-
-//			glRotatef(angle * celestialBody->getCoefTranslation(), 0, 1, 0);
-//			glTranslated(celestialBody->getCoordindate()->getX(),0,depth);
-//			glRotatef(angle * celestialBody->getCoefRotation(), 0, 1, 0);
-//			glutWireSphere(celestialBody->getScale(),5,5);
-
 			Coordinate *coordinate = calculePosition(celestialBody->getCoordindate()->getX(),
-					angle * celestialBody->getCoefTranslation());
+					angle * celestialBody->getCoefTranslation(), celestialBody->getMultRouteX(), celestialBody->getMultRouteZ());
 
-//			glRotatef(angle * celestialBody->getCoefTranslation(), 0, 1, 0);
+			if (showRoute) {
+				drawRote(celestialBody->getCoordindate()->getX(), celestialBody->getMultRouteX(), celestialBody->getMultRouteZ());
+			}
+
+			glBindTexture(GL_TEXTURE_2D, planetTextures[i]);
+
+			glColor3f(1, 1, 1);
 			glTranslated(coordinate->getX(), coordinate->getY(), coordinate->getZ());
 			glPushMatrix();
+				glMaterialfv(GL_FRONT, GL_SHININESS, matShine);
 				glRotatef(angle * celestialBody->getCoefRotation(), 0, 1, 0);
-				glutWireSphere(celestialBody->getScale(),5,5);
+				drawSphere(celestialBody->getScale(), 50, 50);
+//				glutSolidSphere(celestialBody->getScale(), 50, 50);
 			glPopMatrix();
 
 
@@ -133,37 +190,31 @@ void CelestialBodyController::drawCelestialBodies(float angle) {
 
 				int count = rand() % 15 + 5;
 
+				coordinate = calculePosition(satellite->getCoordindate()->getX(),
+						angle * satellite->getCoefTranslation(), satellite->getMultRouteX(), satellite->getMultRouteZ());
+
+				if (showRoute) {
+					drawRote(satellite->getCoordindate()->getX(), satellite->getMultRouteX(), satellite->getMultRouteZ());
+				}
+
+				glBindTexture(GL_TEXTURE_2D, satelliteTextures[j]);
+
+				glColor3f(1.0, 1.0, 1.0);
 				glPushMatrix();
-//					glRotatef(angle * satellite->getCoefRotation(), 0, 0, 1);
-//					glTranslated(satellite->getCoordindate()->getX(),0, 0);
-//					glRotatef(-angle * satellite->getCoefRotation(), 0, 0, 1);
-//					glRotatef((angle + j * DefaultParams::SATELLITE_DELAY * angle) * satellite->getCoefTranslation(), 0, 0, 1);
-//					glutSolidSphere(satellite->getScale(), count, count);
-
-
-//					glRotatef(angle * satellite->getCoefTranslation(), 0, 1, 0);
-//					glTranslated(satellite->getCoordindate()->getX(),0, 0);
-//					glRotatef(-angle * satellite->getCoefTranslation(), 0, 1, 0);
-//					glRotatef((angle + j * DefaultParams::SATELLITE_DELAY * angle) * satellite->getCoefRotation(), 0, 1, 0);
-//					glutWireSphere(satellite->getScale(), count, count);
-
-				coordinate = calculePosition(satellite->getCoordindate()->getX(), angle * satellite->getCoefTranslation());
-
-				glTranslated(coordinate->getX(), coordinate->getY(), coordinate->getZ());
-//				glRotatef(-angle * satellite->getCoefTranslation(), 0, 1, 0);
-//				glRotatef((angle + j * DefaultParams::SATELLITE_DELAY * angle) * satellite->getCoefRotation(), 0, 1, 0);
-				glutWireSphere(satellite->getScale(), count, count);
-
+					glMaterialfv(GL_FRONT, GL_SHININESS, matShine);
+					glTranslated(coordinate->getX(), coordinate->getY(), coordinate->getZ());
+					glRotatef((angle + j * DefaultParams::SATELLITE_DELAY * angle) * satellite->getCoefRotation(), 0, 1, 0);
+					drawSphere(satellite->getScale(), 50, 50);
 				glPopMatrix();
 
 			}
 
 		glPopMatrix();
-
 	}
 
 	glDisable(GL_TEXTURE_2D);
-	glDisable(GL_LIGHTING);
+	if (onLight)
+		glDisable(GL_LIGHTING);
 }
 
 void CelestialBodyController::initCelestialBodies(Params *params) {
@@ -191,7 +242,6 @@ void CelestialBodyController::initCelestialBodies(Params *params) {
 
 	float distancePlanet = initialDistancePlanet * 1.8;
 
-
 	for (int i = 0; i < params->getPlanetsAmount(); i++) {
 
 		CelestialBody *planet = new CelestialBody();
@@ -206,8 +256,15 @@ void CelestialBodyController::initCelestialBodies(Params *params) {
 		float planetTranslation = rand() % (int) 700 / 1000.0;
 		planetTranslation += 0.3;
 
+		float multRouteX = rand() % (int) 1000 / 1000.0;
+		multRouteX += 1;
+		float multRouteZ = rand() % (int) 1000 / 1000.0;
+		multRouteZ += 1;
+
 		planet->setCoefRotation(planetRotation);
 		planet->setCoefTranslation(planetTranslation);
+		planet->setMultRouteX(multRouteX);
+		planet->setMultRouteZ(multRouteZ);
 
 		Coordinate *coordinate = new Coordinate(distancePlanet + planetScale, 0, 0);
 		planet->setCoordinate(coordinate);
@@ -239,13 +296,12 @@ void CelestialBodyController::initCelestialBodies(Params *params) {
 		}
 
 		float val = rand() % ((int) initialDistancePlanet * 1000) / 1000.0;
-		distancePlanet += val + planetScale;
+		distancePlanet += val * multRouteX + planetScale;
 	}
 
-	cout << "veio aqui " << endl;
 }
 
-CameraCoordinate *CelestialBodyController::getCameraCoordinateBySatellitePosition(float angle) {
+CameraCoordinate *CelestialBodyController::getCameraCoordinateBySatellitePosition(float angle, double cameraDistance) {
 
 	if (celestialBodies != NULL) {
 
@@ -255,70 +311,32 @@ CameraCoordinate *CelestialBodyController::getCameraCoordinateBySatellitePositio
 		double planetPosition[3];
 		double satellitePosition[3];
 
-//		double distanceCamera[] = { 2, 0, 2 };
-		double distanceCamera = 3;
-
 		double rouboNegativoSafadeza = -1;
 
 		if (planet->getCelestialBodies() != NULL && planet->getCelestialBodies()->size() > 0) {
 			satellite = planet->getCelestialBodies()->at(0);
 
-//			planetPosition[0] = rouboNegativoSafadeza * sin( piRad * angle * planet->getCoefTranslation() ) *
-//					planet->getCoordindate()->getX();
-//			planetPosition[2] = rouboNegativoSafadeza * cos( piRad * angle * planet->getCoefTranslation() ) *
-//					planet->getCoordindate()->getX();
-
-			Coordinate *planetCoordinate = calculePosition(planet->getCoordindate()->getX(), angle * planet->getCoefTranslation());
+			Coordinate *planetCoordinate = calculePosition(planet->getCoordindate()->getX(),
+					angle * planet->getCoefTranslation(), planet->getMultRouteX(), planet->getMultRouteZ());
 			planetPosition[0] = planetCoordinate->getX();
 			planetPosition[1] = planetCoordinate->getY();
 			planetPosition[2] = planetCoordinate->getZ();
-
-//			planetPosition[0] = rouboNegativoSafadeza * sin( piRad * angle * planet->getCoefTranslation() ) *
-//					planet->getCoordindate()->getX();
-//			planetPosition[2] = rouboNegativoSafadeza * cos( piRad * angle * planet->getCoefTranslation() ) *
-//					planet->getCoordindate()->getX();
 
 			double valCos = rouboNegativoSafadeza * cos( piRad * angle * satellite->getCoefTranslation() );
 			double valSin = rouboNegativoSafadeza * sin( piRad * angle * satellite->getCoefTranslation() );
 
 
-//			satellitePosition[0] = valSin *
-//					satellite->getCoordindate()->getX();
-//			satellitePosition[2] = valCos *
-//					satellite->getCoordindate()->getX();
-			Coordinate *satelliteCoordinate = calculePosition(satellite->getCoordindate()->getX(), angle * (satellite->getCoefTranslation()));
-			satellitePosition[0] = satelliteCoordinate->getX() + distanceCamera * valSin;
+			Coordinate *satelliteCoordinate = calculePosition(satellite->getCoordindate()->getX(),
+					angle * satellite->getCoefTranslation(), satellite->getMultRouteX(), satellite->getMultRouteZ());
+			satellitePosition[0] = satelliteCoordinate->getX() + cameraDistance * valSin * planet->getMultRouteX();
 			satellitePosition[1] = satelliteCoordinate->getY();
-			satellitePosition[2] = satelliteCoordinate->getZ() + distanceCamera * valCos;
-
-//			if (valCos >= 0) {
-//				satellitePosition[0] += distanceCamera[0];
-//			} else {
-//				satellitePosition[0] -= distanceCamera[0];
-//			}
-
-//			satellitePosition[1] += distanceCamera[1];
-
-//			if (valSin >= 0) {
-//				satellitePosition[2] += distanceCamera[2];
-//			} else {
-//				satellitePosition[2] += distanceCamera[2];
-//			}
-
+			satellitePosition[2] = satelliteCoordinate->getZ() + cameraDistance * valCos * planet->getMultRouteZ();
 
 			CameraCoordinate *cameraCoordinate = new CameraCoordinate();
-//			cameraCoordinate->setEyeCoordinate(
-//					new Coordinate(satellitePosition[0] + planetPosition[0], satellitePosition[1] + planetPosition[1], satellitePosition[2] + planetPosition[2]));
 			cameraCoordinate->setEyeCoordinate(
 								new Coordinate(satellitePosition[0] + planetPosition[0], satellitePosition[1] + planetPosition[1], satellitePosition[2] + planetPosition[2]));
 			cameraCoordinate->setCenterCoordinate(
 					new Coordinate(planetPosition[0], planetPosition[1], planetPosition[2]));
-
-//			CameraCoordinate *cameraCoordinate = new CameraCoordinate();
-//			cameraCoordinate->setEyeCoordinate(
-//					new Coordinate(planetPosition[0], planetPosition[1], planetPosition[2]));
-//			cameraCoordinate->setCenterCoordinate(
-//					new Coordinate(planetPosition[0], planetPosition[1], planetPosition[2]));
 
 			return cameraCoordinate;
 		}
@@ -328,15 +346,37 @@ CameraCoordinate *CelestialBodyController::getCameraCoordinateBySatellitePositio
 	return NULL;
 }
 
-Coordinate *CelestialBodyController::calculePosition(double distance, double angle) {
+void CelestialBodyController::drawRote(double distance, double multX, double multZ) {
+
+	if (onLight)
+		glDisable(GL_LIGHTING);
+
+	glColor3f(1, 1, 1);
+	int increment = 1;
+	Coordinate *c = NULL;
+
+	for (int i = 0; i < 360; i += increment) {
+		c = calculePosition(distance, i, multX, multZ);
+
+		glPushMatrix();
+			glTranslated(c->getX(), c->getY(), c->getZ());
+			glutSolidCube(0.05);
+		glPopMatrix();
+	}
+
+	if (onLight)
+		glEnable(GL_LIGHTING);
+}
+
+Coordinate *CelestialBodyController::calculePosition(double distance, double angle, double multX, double multZ) {
 	double position[3];
 
 	double rouboNegativoSafadeza = -1;
 
 	position[0] = rouboNegativoSafadeza * sin( piRad * angle ) *
-			distance;
+			distance * multX;
 	position[2] = rouboNegativoSafadeza * cos( piRad * angle ) *
-			distance;
+			distance * multZ;
 
 	return new Coordinate(position[0], position[1], position[2]);
 }

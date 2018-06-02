@@ -21,6 +21,9 @@ public:
 
 	// Atraso de um satelite para outro
 	static float SATELLITE_DELAY;
+
+	// O tanto que incrementa na camera pra mexer nela
+	static float CAMERA_INCREMENT;
 };
 
 #endif /* DEFAULTPARAMS_H_ */

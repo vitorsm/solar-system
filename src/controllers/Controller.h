@@ -44,6 +44,19 @@ public:
 
 private:
 
+	static bool onLight;
+	static bool showRoute;
+
+	static float xCamera;
+	static float yCamera;
+	static float zCamera;
+	static float xCenter;
+	static float yCenter;
+	static float zCenter;
+
+	static int cameraController;
+	static bool showCamera3;
+	static double camera3Distance;
 	static void setCamera(int newCameraId);
 	static CelestialBodyController *celestialBodyController;
 	static ParamsController *paramsController;

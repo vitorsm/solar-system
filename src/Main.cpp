@@ -56,13 +56,9 @@ void setup() {
 	float s = 50.0;
 	float matShine[] = { s };
 
-	// Definindo as propriedades do material
-	glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, matAmbAndDif);
-	glMaterialfv(GL_FRONT, GL_SPECULAR, matSpec);
-	glMaterialfv(GL_FRONT, GL_SHININESS, matShine);
+	// Habilita a definição da cor do material a partir da cor corrente
+	glEnable(GL_COLOR_MATERIAL);
 
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 }
 
 void reshape(int width, int height) {

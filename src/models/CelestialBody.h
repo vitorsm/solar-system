@@ -8,6 +8,7 @@
 #ifndef CELESTIALBODY_H_
 #define CELESTIALBODY_H_
 
+#include <iostream>
 #include <vector>
 #include "Coordinate.h"
 
@@ -28,7 +29,13 @@ public:
 	void setCoefRotation(float coefRotation);
 	float getCoefRotation();
 	void addCelestialBody(CelestialBody *celestialBody);
+	void setMultRouteX(double multRouteX);
+	double getMultRouteX();
+	void setMultRouteZ(double multRouteZ);
+	double getMultRouteZ();
 private:
+	double multRouteX;
+	double multRouteZ;
 	float scale;
 	Coordinate *coordinate;
 	vector<CelestialBody*> *celestialBodies;

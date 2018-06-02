@@ -24,3 +24,6 @@ int DefaultParams::UPDATE_TIME = 33;
 
 // Atraso de um satelite para outro
 float DefaultParams::SATELLITE_DELAY = 0.9;
+
+// O tanto que incrementa na camera pra mexer nela
+float DefaultParams::CAMERA_INCREMENT = 0.8;

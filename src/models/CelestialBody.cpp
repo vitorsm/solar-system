@@ -8,8 +8,11 @@
 #include "CelestialBody.h"
 
 CelestialBody::CelestialBody() {
-	coefRotation = 1;
-	coefTranslation = 1;
+	this->coefRotation = 1;
+	this->coefTranslation = 1;
+	this->multRouteX = 1;
+	this->multRouteZ = 1;
+	this->celestialBodies = NULL;
 }
 
 CelestialBody::~CelestialBody() {
@@ -54,9 +57,27 @@ vector<CelestialBody*> *CelestialBody::getCelestialBodies() {
 
 void CelestialBody::addCelestialBody(CelestialBody *celestialBody) {
 
-	if (this->celestialBodies == 0) {
+	if (this->celestialBodies == NULL) {
 		this->celestialBodies = new vector<CelestialBody*>();
 	}
 
-	this->celestialBodies->push_back(celestialBody);
+	if (celestialBody != NULL) {
+		this->celestialBodies->push_back(celestialBody);
+	}
+}
+
+void CelestialBody::setMultRouteX(double multRouteX) {
+	this->multRouteX = multRouteX;
+}
+
+double CelestialBody::getMultRouteX() {
+	return this->multRouteX;
+}
+
+void CelestialBody::setMultRouteZ(double multRouteZ) {
+	this->multRouteZ = multRouteZ;
+}
+
+double CelestialBody::getMultRouteZ() {
+	return this->multRouteZ;
 }
